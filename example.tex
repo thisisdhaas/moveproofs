@@ -1,10 +1,11 @@
 \documentclass{article}
 
-\usepackage[location=inline]{moveproofs}
+\usepackage[location=appendix]{moveproofs}
 
 % This is necessary: moveproofs will define a proof environment if you don't have one, 
 % but you have to define your own theorem, corollary, etc. environments.
 \newtheorem{theorem}{Theorem}
+\newtheorem{corollary}[theorem]{Corollary}
 
 \title{Example document with proofs moved around.}
 \author{Daniel Haas}
@@ -16,16 +17,33 @@
 \section{Paper Body}
 Let's prove some theorems! Because ``location" was set to \ifmoveproofstoappendix ``appendix'', \else ``inline'', \fi the proofs will appear \ifmoveproofstoappendix in the appendix. \else inline, and no appendix will be displayed. \fi
 
+
+% Theorem one.
 \begin{theorem}\label{theorem_one}
 Given $\delta \in (0, 1)$, with probability $1 - \delta$, proofs are useful.
 \end{theorem}
 
-\makeproof{ExampleProofOne}{
+\makeproof{theorem_one}{
 Proofs are great! Therefore, we have our result.
 }
 
+% Corollary two.
+\vspace{0.4cm}
+\noindent We can also use the moveproofs package to prove statements that aren't theorems.
+Note the reference to the corollary when this proof is moved to the appendix.
+
+\begin{corollary}\label{corollary_two}
+Given $\delta \in (0, 1)$, with probability $1 - \delta$, corollaries are useful.
+\end{corollary}
+
+\makeproof{corollary_two}{
+Corollaries support proofs. Therefore, we have our result.
+}
+
+% Appendix
 \appendix
 \appendixproofsection{Our Proofs}
-\appendixproof{theorem_one}{ExampleProofOne}
+\appendixproof{theorem_one}
+\appendixproof[Corollary]{corollary_two}
 
 \end{document}

@@ -1,0 +1,66 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{moveproofs}[2016/02/22 LaTex package for auto-moving proofs to the appendix]
+
+\RequirePackage{pgfkeys}
+\RequirePackage{pgfopts}
+
+% TODO(dhaas): only define the proof environment if necessary.
+% TODO(dhaas): By default, create an appendix and a section in the appendix called "Proofs" if no appendixproofsections are defined. Further, place all of the proofs in the default section.
+% TODO(dhaas): Add options for the defaultappendixsectionname. 
+% TODO(dhaas): implement \makeproofs using pgfkeys
+% TODO(dhaas): Move optional [Theorem | Corollary | etc.] argument to \makeproof, not \appendixproof
+% TODO(dhaas): Move label argument to \makeproof, not \appendixproof.
+% TODO(dhaas): Remove current \makeproof label option so only the theorem label is required.
+
+% Namespace our key-value store.
+\pgfkeys{/moveproofs/.is family}
+
+% Set up the 'location' option, which may be set to 'inline' (don't move proofs) or 'appendix' (move proofs to the appendix).
+\newif\ifmoveproofstoappendix
+\pgfkeys{moveproofs,
+  location/.is choice,
+  location/inline/.code={\moveproofstoappendixfalse},
+  location/appendix/.code={\moveproofstoappendixtrue},}
+
+% Process the passed package options
+\ProcessPgfOptions{moveproofs}
+
+% TODO(dhaas): only define this environment if it doesn't exist.
+\newenvironment{proof}{ \par\noindent{\bfseries\upshape Proof\ }}
+
+% The \makeproof command lets you define a proof in the paper.
+% Arguments are a label for the proof, and the proof body itself.
+% Example usage: \makeproof{TheoremOneProof}{$a = b$, so we're done.}.
+% Note: the label must not contain underscores for this to work.
+\newcommand{\makeproof}[2]{
+\expandafter\newcommand\csname#1\endcsname{#2}
+
+\ifmoveproofstoappendix
+\else
+\begin{proof}
+\expandafter\ \csname#1\endcsname
+\end{proof}
+\fi
+}
+
+% The \appendixproof command lets you mark where a proof will be moved to.
+% If location="appendix" was passed, it will create a subsection in the appendix with the proof in it.
+% Arguments are the theorem label (for a nice reference) and the same proof label you passed to \makeproof.
+% Example usage: \appendixproof{theorem_one}{TheoremOneProof}
+\newcommand{\appendixproof}[3][Theorem]{
+\ifmoveproofstoappendix
+\subsection{Proof of #1~\ref{#2}}\label{#3}
+\begin{proof}
+\expandafter\ \csname#3\endcsname
+\end{proof}
+\else
+\fi
+}
+
+% The \appendixproofsection command lets you add a section to contain proofs in the appendix.
+% The section will not appear if the "moveproofs" flag is false
+\newcommand{\appendixproofsection}[1]{
+\ifmoveproofstoappendix
+\section{#1}
+\fi
+}

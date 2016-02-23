@@ -1,6 +1,7 @@
 # LaTeX artifacts
 *.aux
 *.synctex.gz
+*.synctex.gz(busy)
 *.bbl
 *.blg
 *.fdb_latexmk

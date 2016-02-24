@@ -14,7 +14,6 @@
 \RequirePackage{ntheorem}
 \RequirePackage{cleveref}
 
-% TODO(dhaas): only define the proof environment if necessary.
 % TODO(dhaas): By default, create an appendix and a section in the appendix called "Proofs" if no appendixproofsections are defined. Further, place all of the proofs in the default section.
 % TODO(dhaas): Add options for the defaultappendixsectionname.
 % TODO(dhaas): Make sure whitespacing in document is consistent with inline or appendix options.
@@ -32,8 +31,18 @@
 % Process the passed package options
 \ProcessPgfOptions{moveproofs}
 
-% TODO(dhaas): only define this environment if it doesn't exist.
-\newenvironment{proof}{ \par\noindent{\bfseries\upshape Proof\ }}
+% Define a simple proof environment if it doesn't exist.
+\makeatletter
+\def\provideenvironment{\@star@or@long\provide@environment}
+\def\provide@environment#1{%
+        \@ifundefined{#1}%
+                {\def\reserved@a{\newenvironment{#1}}}%
+                {\def\reserved@a{\renewenvironment{dummy@environ}}}%
+        \reserved@a
+}
+\def\dummy@environ{}
+\makeatother
+\provideenvironment{proof}{ \par\noindent{\bfseries\upshape Proof\ }}{}
 
 % Low-level commands for manipulating the kv-store.
 \newcommand{\MPStoreProof}[2]{\pgfkeys{moveproofs, proofs/#1/content/.code={#2}}}

@@ -1,15 +1,22 @@
+% moveproofs: a package for auto-moving proofs to the appendix of a document.
+% 
+% (c) Daniel Haas, 2016
+%
+%% This program can be redistributed and/or modified under the terms
+%% of the LaTeX Project Public License Distributed from CTAN archives
+%% in directory macros/latex/base/lppl.txt.
+% 
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{moveproofs}[2016/02/22 LaTex package for auto-moving proofs to the appendix]
 
 \RequirePackage{pgfkeys}
 \RequirePackage{pgfopts}
+\RequirePackage{ntheorem}
+\RequirePackage{cleveref}
 
 % TODO(dhaas): only define the proof environment if necessary.
 % TODO(dhaas): By default, create an appendix and a section in the appendix called "Proofs" if no appendixproofsections are defined. Further, place all of the proofs in the default section.
 % TODO(dhaas): Add options for the defaultappendixsectionname.
-% TODO(dhaas): Move optional [Theorem | Corollary | etc.] argument to \makeproof, not \appendixproof
-% TODO(dhaas): Move label argument to \makeproof, not \appendixproof.
-% TODO(dhaas): Remove current \makeproof label option so only the theorem label is required.
 % TODO(dhaas): Make sure whitespacing in document is consistent with inline or appendix options.
 
 % Namespace our key-value store.
@@ -28,43 +35,47 @@
 % TODO(dhaas): only define this environment if it doesn't exist.
 \newenvironment{proof}{ \par\noindent{\bfseries\upshape Proof\ }}
 
-% The \insertproof command lets you insert a previously defined proof into the document.
-\newcommand{\insertproof}[1]{\pgfkeys{moveproofs, proofs/#1}}
+% Low-level commands for manipulating the kv-store.
+\newcommand{\MPStoreProof}[2]{\pgfkeys{moveproofs, proofs/#1/content/.code={#2}}}
+\newcommand{\MPGetProof}[1]{\pgfkeys{moveproofs, proofs/#1/content}}
+%\newcommand{\MPStoreProofStatementType}[2]{\pgfkeys{moveproofs, proofs/#1/statement type/.code={#2}}}
+%\newcommand{\MPGetProofStatementType}[1]{\pgfkeys{moveproofs, proofs/#1/statement type}}
 
 % The \makeproof command lets you define a proof in the document.
 % Arguments are a label for the proof, and the proof body itself.
-% Example usage: \makeproof{theorem_one}{$a = b$, so we're done.}.
+% Example usage: \makeproof[Corollary]{corollary_one}{$a = b$, so we're done.}.
 \newcommand{\makeproof}[2]{
-\pgfkeys{moveproofs, proofs/#1/.code={#2}} % insert the proof into the kv-store.
+    % #1 is the statement label (e.g. theorem_one)
+    % #2 is the proof content
+    \MPStoreProof{#1}{#2}
 
-% Insert the proof directly into the document inline according to the package options.
-\ifmoveproofstoappendix
-\else
-\begin{proof}
-\insertproof{#1}
-\end{proof}
-\fi
+    % Insert the proof directly into the document inline if required by package options.
+    \ifmoveproofstoappendix
+    \else
+        \begin{proof}
+        \MPGetProof{#1}
+        \end{proof}
+    \fi
 }
 
 % The \appendixproof command lets you mark where a proof will be moved to.
 % If location="appendix" was passed, it will create a subsection in the appendix with the proof in it.
-% Arguments are the theorem label you passed to \makeproof, and an optional argument of the type of statement
-% you are proving (defaults to 'Theorem').
-% Example usage: \appendixproof[Corollary]{corollary_one}
-\newcommand{\appendixproof}[2][Theorem]{
+% The argument is the theorem label you passed to \makeproof.
+% Example usage: \appendixproof{corollary_one}
+\newcommand{\appendixproof}[1]{
 \ifmoveproofstoappendix
-\subsection{Proof of #1~\ref{#2}}\label{#2_proof}
-\begin{proof}
-\insertproof{#2}
-\end{proof}
+    \subsection{Proof of \Cref{#1}}\label{#1_proof}
+    \begin{proof}
+    \MPGetProof{#1}
+    \end{proof}
 \else
 \fi
 }
 
 % The \appendixproofsection command lets you add a section to contain proofs in the appendix.
-% The section will not appear if the "moveproofs" flag is false
+% The section will only appear if location="appendix".
 \newcommand{\appendixproofsection}[1]{
 \ifmoveproofstoappendix
-\section{#1}
+    \section{#1}
 \fi
 }

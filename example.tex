@@ -1,40 +1,80 @@
 \documentclass{article}
 
-\usepackage[location=appendix]{moveproofs}
+% Options for moveproofs, which control where and how proofs are displayed.
+\usepackage[
+    location=appendix,
+    appendixsectionname={Our Proofs},
+    prependtoappendix=false,
+    manual=false,
+]{moveproofs}
+
+\usepackage{listings}
 
 % moveproofs will define a proof environment if you don't have one, 
 % but you have to define your own theorem, corollary, etc. environments.
 \newtheorem{theorem}{Theorem}
 \newtheorem{corollary}[theorem]{Corollary}
 
-
-\title{Example document with proofs moved around.}
+\title{\vspace{-2.75cm}The \texttt{moveproofs} Package}
 \author{Daniel Haas}
 
 \begin{document}
 
 \maketitle
 
-\section{Paper Body}
-Let's prove some theorems! Because ``location" was set to \ifmoveproofstoappendix ``appendix'', \else ``inline'', \fi the proofs will appear \ifmoveproofstoappendix in the appendix. \else inline, and no appendix will be displayed. \fi
+\section{Package Overview}
+Welcome to the \texttt{moveproofs} package, which will let you write your proofs inline with your document, then automatically move them to the appendix.
+To use the package:
+\begin{enumerate}
+    \item Write down and label theorems:
+\begin{lstlisting}[language=TeX, moretexcs={begin, label}]
+\begin{theorem}\label{my_theorem}
+    The world is flat.
+\end{theorem}
+\end{lstlisting}
+    \item Prove your theorems using the \texttt{\textbackslash makeproof} command:
+\begin{lstlisting}[language=TeX, moretexcs={begin, label, makeproof}]
+\makeproof{my_theorem}{
+    My worldview does not permit a round Earth.
+    Therefore, the world is flat.
+}
+\end{lstlisting}
+    \item Include the \texttt{moveproofs} package (\texttt{\textbackslash usepackage\{moveproofs\}}) and alter its options to choose how proofs are displayed:
+        \begin{itemize}
+        \item \texttt{location = [inline | appendix]}. Controls whether proofs are displayed inline (where you wrote the \texttt{\textbackslash makeproof} command) or in the appendix of the document. This option is required.
+        \item \texttt{appendixsectionname = NAME}. Customizes the name of the appendix section in which proofs are displayed (`Proofs' by default).
+        \item \texttt{prependtoappendix = [true | false]}. Controls whether proofs are inserted before existing appendix sections or after them (false by default: proofs are inserted at the end of the appendix).
+        \item \texttt{manual = [true | false]}. If this option is set to \texttt{true} and \texttt{location = appendix}, proofs will not automatically be inserted in the appendix. Rather, you can control where proofs are inserted with two commands:
+            \begin{itemize}
+            \item \texttt{\textbackslash appendixproofsection\{Section Name\}}: creates a section in the appendix that appears only if \texttt{location = appendix}.
+            \item \texttt{\textbackslash appendixproof\{theorem\_label\}}: Inserts the proof you wrote inside \texttt{\texttt\textbackslash makeproof\{theorem\_label\}} (again, only if \texttt{location = appendix}).
+            \end{itemize}
+        \end{itemize}
+    \item use the \texttt{\textbackslash appendixproofnotice[MESSAGE]} command to notify readers that proofs will appear in the appendix. Default text (or the replacement text given in the optional \texttt{MESSAGE} argument) will appear only if \texttt{location = appendix}.\end{enumerate}
 
+\section{Demonstration}
+The remainder of this document demonstrates the functionality of the \texttt{moveproofs} package.
+Feel free to modify the source to see how the options affect the document's appearance.
+
+First, we use the \texttt{\textbackslash appendixproofnotice} command to notify readers that proofs will appear in the appendix. If \texttt{location = appendix}, the notification will appear in bold in the following sentence of this paragraph (boldface is for emphasis, not provided by the command). \textbf{\appendixproofnotice[Proofs are all in the appendix.]}
+
+Now, let's prove some theorems! The \texttt{location} package option controls whether the proofs appear inline or in the appendix.
 
 % Theorem one.
 \begin{theorem}\label{theorem_one}
-Given $\delta \in (0, 1)$, with probability $1 - \delta$, proofs are useful.
+For any $\delta \in (0, 1)$, with probability $1 - \delta$, proofs are useful.
 \end{theorem}
 
 \makeproof{theorem_one}{
 Proofs are great! Therefore, we have our result.
 }
 
-% Corollary two.
-\vspace{0.4cm}
 \noindent We can also use the moveproofs package to prove statements that aren't theorems.
-Note the reference to the corollary when this proof is moved to the appendix.
+Note the reference to the corollary when this proof is moved to the appendix (thanks to the \texttt{cleveref} package).
 
+% Corollary two.
 \begin{corollary}\label{corollary_two}
-Given $\delta \in (0, 1)$, with probability $1 - \delta$, corollaries are useful.
+For any $\delta \in (0, 1)$, with probability $1 - \delta$, corollaries are useful.
 \end{corollary}
 
 \makeproof{corollary_two}{
@@ -43,8 +83,10 @@ Corollaries support proofs. Therefore, we have our result.
 
 % Appendix
 \appendix
-\appendixproofsection{Our Proofs}
-\appendixproof{theorem_one}
-\appendixproof{corollary_two}
+\section{Existing Appendix}
+The \texttt{moveproofs} package won't alter existing appendix material.
+Toggle the \texttt{prependtoappendix} option to choose whether proofs are placed before or after the existing appendix.
+Alternatively, set \texttt{manual = true} to turn off automatic proof insertion into the appendix and use the \texttt{\textbackslash appendixproofsection\{Section Name\}} and \texttt{\textbackslash appendixproof\{theorem\_label\}} commands to manually specify where the proofs should go.
+
 
 \end{document}

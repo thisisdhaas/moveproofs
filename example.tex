@@ -47,10 +47,11 @@ To use the package:
         \item \texttt{manual = [true | false]}. If this option is set to \texttt{true} and \texttt{location = appendix}, proofs will not automatically be inserted in the appendix. Rather, you can control where proofs are inserted with two commands:
             \begin{itemize}
             \item \texttt{\textbackslash appendixproofsection\{Section Name\}}: creates a section in the appendix that appears only if \texttt{location = appendix}.
-            \item \texttt{\textbackslash appendixproof\{theorem\_label\}}: Inserts the proof you wrote inside \texttt{\texttt\textbackslash makeproof\{theorem\_label\}} (again, only if \texttt{location = appendix}).
+            \item \texttt{\textbackslash appendixproof\{theorem\_label\}}: Inserts the proof you wrote inside \texttt{\textbackslash makeproof\{theorem\_label\}} (again, only if \texttt{location = appendix}).
             \end{itemize}
         \end{itemize}
-    \item use the \texttt{\textbackslash appendixproofnotice[MESSAGE]} command to notify readers that proofs will appear in the appendix. Default text (or the replacement text given in the optional \texttt{MESSAGE} argument) will appear only if \texttt{location = appendix}.\end{enumerate}
+    \item Use the \texttt{\textbackslash appendixproofnotice[MESSAGE]} command to notify readers that proofs will appear in the appendix. Default text (or the replacement text given in the optional \texttt{MESSAGE} argument) will appear only if \texttt{location = appendix}.
+\end{enumerate}
 
 \section{Demonstration}
 The remainder of this document demonstrates the functionality of the \texttt{moveproofs} package.

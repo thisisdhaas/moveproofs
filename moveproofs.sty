@@ -14,24 +14,42 @@
 \RequirePackage{ntheorem}
 \RequirePackage{cleveref}
 
-% TODO(dhaas): By default, create an appendix and a section in the appendix called "Proofs" if no appendixproofsections are defined. Further, place all of the proofs in the default section.
-% TODO(dhaas): Add options for the defaultappendixsectionname.
-% TODO(dhaas): Make sure whitespacing in document is consistent with inline or appendix options.
-
 % Namespace our key-value store.
 \pgfkeys{/moveproofs/.is family}
 
 % Set up the 'location' option, which may be set to 'inline' (don't move proofs) or 'appendix' (move proofs to the appendix).
 \newif\ifmoveproofstoappendix
 \pgfkeys{moveproofs,
-  location/.is choice,
-  location/inline/.code={\moveproofstoappendixfalse},
-  location/appendix/.code={\moveproofstoappendixtrue},}
+  options/location/.is choice,
+  options/location/inline/.code={\moveproofstoappendixfalse},
+  options/location/appendix/.code={\moveproofstoappendixtrue},
+}
+
+% Set up the 'manual' option, which may be set to 'true' (the user must use \appendixproofsection and \appendixproof in
+% order for proofs to appear in the appendix) or 'false' (default, proofs are automatically displayed in the appendix in a 
+% section called 'Proofs'.
+\newif\ifmanualappendix
+\pgfkeys{moveproofs, options/manual/.is if=manualappendix}
+
+% Set up the 'appendixsectionname' option, which takes a string, and (if 'manual=false'), will be used instead of 'Proofs'
+% as the name of the appendix section where proofs are displayed.
+\newcommand{\MPAppendixSectionName}{Proofs}
+\pgfkeys{moveproofs, 
+    options/appendixsectionname/.code={\renewcommand{\MPAppendixSectionName}{#1}}
+}
+
+% Set up the 'prependtoappendix' option, which may be set to 'true' (proofs are added to the beginning of the appendix)
+% or 'false' (default, proofs are added to the end of the appendix). Option is only used if location=appendix, manual=false,
+% and the user has already created their own appendix section.
+\newif\ifprependtoappendix
+\pgfkeys{moveproofs, options/prependtoappendix/.is if=prependtoappendix}
 
 % Process the passed package options
-\ProcessPgfOptions{moveproofs}
+\ProcessPgfOptions{moveproofs/options}
 
 % Define a simple proof environment if it doesn't exist.
+\newcommand{\BlackBox}{\rule{1.5ex}{1.5ex}}
+\newcommand*{\MPQED}{\hfill\BlackBox\\[0.1mm]}
 \makeatletter
 \def\provideenvironment{\@star@or@long\provide@environment}
 \def\provide@environment#1{%
@@ -42,20 +60,22 @@
 }
 \def\dummy@environ{}
 \makeatother
-\provideenvironment{proof}{ \par\noindent{\bfseries\upshape Proof\ }}{}
+\provideenvironment{proof}{ \par\noindent{\bfseries\upshape Proof\ }}{\MPQED}
 
 % Low-level commands for manipulating the kv-store.
-\newcommand{\MPStoreProof}[2]{\pgfkeys{moveproofs, proofs/#1/content/.code={#2}}}
+%\pgfkeys{moveproofs, proofs/list/.initial={}}
+\newcommand{\MPStoreProof}[2]{
+    \pgfkeys{moveproofs, 
+        proofs/#1/content/.code={#2},
+        proofs/list/.append={\appendixproof{#1}}
+    }
+}
 \newcommand{\MPGetProof}[1]{\pgfkeys{moveproofs, proofs/#1/content}}
-%\newcommand{\MPStoreProofStatementType}[2]{\pgfkeys{moveproofs, proofs/#1/statement type/.code={#2}}}
-%\newcommand{\MPGetProofStatementType}[1]{\pgfkeys{moveproofs, proofs/#1/statement type}}
 
 % The \makeproof command lets you define a proof in the document.
 % Arguments are a label for the proof, and the proof body itself.
-% Example usage: \makeproof[Corollary]{corollary_one}{$a = b$, so we're done.}.
+% Example usage: \makeproof{theorem_one}{$a = b$, so we're done.}.
 \newcommand{\makeproof}[2]{
-    % #1 is the statement label (e.g. theorem_one)
-    % #2 is the proof content
     \MPStoreProof{#1}{#2}
 
     % Insert the proof directly into the document inline if required by package options.
@@ -70,7 +90,7 @@
 % The \appendixproof command lets you mark where a proof will be moved to.
 % If location="appendix" was passed, it will create a subsection in the appendix with the proof in it.
 % The argument is the theorem label you passed to \makeproof.
-% Example usage: \appendixproof{corollary_one}
+% Example usage: \appendixproof{theorem_one}
 \newcommand{\appendixproof}[1]{
 \ifmoveproofstoappendix
     \subsection{Proof of \Cref{#1}}\label{#1_proof}
@@ -83,8 +103,42 @@
 
 % The \appendixproofsection command lets you add a section to contain proofs in the appendix.
 % The section will only appear if location="appendix".
-\newcommand{\appendixproofsection}[1]{
-\ifmoveproofstoappendix
-    \section{#1}
-\fi
+\newcommand{\appendixproofsection}[1]{\ifmoveproofstoappendix\section{#1}\fi}
+
+% The \appendixproofnotice command lets you define a notice that the proofs have been moved to the appendix
+% The section will only appear if location="appendix". The optional argument is a replacement for the default language.
+\newcommand{\appendixproofnotice}[1][All proofs will appear in the appendix.]{\ifmoveproofstoappendix#1\fi}
+
+% Internal use only: track existence of appendix and auto-add proofs to the appendix.
+\let\oldappendix\appendix% Store \appendix
+\newif\ifnoappendix % True if the user hasn't created an appendix
+\newif\ifproofsinserted % True if this package has auto-inserted proofs into the document.
+\noappendixtrue
+\newcommand{\MPAppendixProofs}{
+    \ifproofsinserted
+    \else
+        \ifmanualappendix
+        \else
+            \ifnoappendix
+                \oldappendix
+            \fi
+            \appendixproofsection{\MPAppendixSectionName}
+            \pgfkeys{moveproofs, proofs/list}
+            \proofsinsertedtrue
+        \fi
+    \fi
 }
+
+% Redefine the \appendix command to track whether the appendix exists and prepend content if necessary.
+\renewcommand{\appendix}{% Update \appendix
+    \oldappendix% Default \appendix
+    \noappendixfalse% Mark appendix as created
+    
+    % Insert proofs at the beginning of the appendix if so specified.
+    \ifprependtoappendix
+        \MPAppendixProofs
+    \fi
+}
+
+% Add all proofs to the end of the appendix if they weren't already prepended.
+\AtEndDocument{\MPAppendixProofs}

@@ -1,6 +1,9 @@
 # The `moveproofs` Package
 A LaTeX package for auto-moving proofs to the appendix of a document.
 
+## Installation
+Simply download `moveproofs.sty` from the [latest release](https://github.com/thisisdhaas/moveproofs/releases) in this repository and make sure it is available to your LaTeX compiler (i.e., by placing it in the same folder as your document or by installing it with other system LaTeX packages).
+
 ## Package Overview
 The `moveproofs` package will let you write your proofs inline with your document, then automatically move them to the appendix.
 To use the package:

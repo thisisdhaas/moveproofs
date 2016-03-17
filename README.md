@@ -29,3 +29,5 @@ To use the package:
      * `\appendixproofsection{Section Name}`: creates a section in the appendix that appears only if `location = appendix`.
      * `\appendixproof{theorem_label}`: Inserts the proof you wrote inside `\makeproof{theorem_label}` (again, only if `location = appendix`).
 4. Use the `\appendixproofnotice[MESSAGE]` command to notify readers that proofs will appear in the appendix. Default text (or the replacement text given in the optional `MESSAGE` argument) will appear only if `location = appendix`.
+
+5. If you don't want to autowrap each call to `\makeproof` in a proof environment (for example, because you want to state a helper lemma before proving the theorem), use `\makeproof*` and `\appendixproof*` instead of `\makeproof` and `\appendixproof`. Remember, this means you are responsible for inserting `\begin{proof}` and `\end{proof}` commands.

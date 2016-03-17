@@ -13,6 +13,7 @@
 \RequirePackage{pgfopts}
 \RequirePackage{ntheorem}
 \RequirePackage{cleveref}
+\RequirePackage{xparse}
 
 % Namespace our key-value store.
 \pgfkeys{/moveproofs/.is family}
@@ -63,40 +64,63 @@
 \provideenvironment{proof}{ \par\noindent{\bfseries\upshape Proof\ }}{\MPQED}
 
 % Low-level commands for manipulating the kv-store.
-%\pgfkeys{moveproofs, proofs/list/.initial={}}
-\newcommand{\MPStoreProof}[2]{
+\newcommand{\MPProofToStore}{}
+\DeclareDocumentCommand{\MPStoreProof}{s m +m}{
+    % Pass the * argument through to \appendixproof
+    \IfBooleanTF{#1}{
+        \renewcommand{\MPProofToStore}[1]{\appendixproof*{##1}}
+    }{
+        \renewcommand{\MPProofToStore}[1]{\appendixproof{##1}}
+    }
     \pgfkeys{moveproofs, 
-        proofs/#1/content/.code={#2},
-        proofs/list/.append={\appendixproof{#1}}
+            proofs/#2/content/.code={#3},
+            proofs/list/.append={\MPProofToStore{#2}}
     }
 }
 \newcommand{\MPGetProof}[1]{\pgfkeys{moveproofs, proofs/#1/content}}
 
 % The \makeproof command lets you define a proof in the document.
 % Arguments are a label for the proof, and the proof body itself.
+% If called with a star (e.g., \makeproof*{theorem_label}{theorem body}), 
+% the proof content will not be auto-wrapped in a proof environment, and you
+% must manually insert your own with \begin{proof} and \end{proof}.
 % Example usage: \makeproof{theorem_one}{$a = b$, so we're done.}.
-\newcommand{\makeproof}[2]{
-    \MPStoreProof{#1}{#2}
+\DeclareDocumentCommand{\makeproof}{s m +m}{
+    \IfBooleanTF{#1}{
+        \MPStoreProof*{#2}{#3}
+    }{
+        \MPStoreProof{#2}{#3}
+    }
 
     % Insert the proof directly into the document inline if required by package options.
     \ifmoveproofstoappendix
     \else
-        \begin{proof}
-        \MPGetProof{#1}
-        \end{proof}
+        \IfBooleanTF{#1}{
+            \MPGetProof{#2}
+        }{
+            \begin{proof}
+            \MPGetProof{#2}
+            \end{proof}
+        }
     \fi
 }
 
 % The \appendixproof command lets you mark where a proof will be moved to.
 % If location="appendix" was passed, it will create a subsection in the appendix with the proof in it.
 % The argument is the theorem label you passed to \makeproof.
+% If called with a star (e.g., \appendixproof*{theorem_label}), 
+% the behavior will match that of \makeproof*.
 % Example usage: \appendixproof{theorem_one}
-\newcommand{\appendixproof}[1]{
+\DeclareDocumentCommand{\appendixproof}{s m}{
 \ifmoveproofstoappendix
-    \subsection{Proof of \Cref{#1}}\label{#1_proof}
-    \begin{proof}
-    \MPGetProof{#1}
-    \end{proof}
+    \subsection{Proof of \Cref{#2}}\label{#2_proof}
+    \IfBooleanTF{#1}{
+        \MPGetProof{#2}
+    }{
+        \begin{proof}
+        \MPGetProof{#2}
+        \end{proof}
+    }
 \else
 \fi
 }

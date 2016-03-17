@@ -14,6 +14,7 @@
 % but you have to define your own theorem, corollary, etc. environments.
 \newtheorem{theorem}{Theorem}
 \newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{lemma}[theorem]{Lemma}
 
 \title{\vspace{-2.75cm}The \texttt{moveproofs} Package}
 \author{Daniel Haas}
@@ -51,6 +52,7 @@ To use the package:
             \end{itemize}
         \end{itemize}
     \item Use the \texttt{\textbackslash appendixproofnotice[MESSAGE]} command to notify readers that proofs will appear in the appendix. Default text (or the replacement text given in the optional \texttt{MESSAGE} argument) will appear only if \texttt{location = appendix}.
+    \item If you don't want to autowrap each call to \texttt{\textbackslash makeproof} in a proof environment (for example, because you want to state a helper lemma before proving the theorem), use \texttt{\textbackslash makeproof*} and \texttt{\textbackslash appendixproof*} instead of \texttt{\textbackslash makeproof} and \texttt{\textbackslash appendixproof}. Remember, this means you are responsible for inserting \texttt{\textbackslash begin\{proof\}} and \texttt{\textbackslash end\{proof\}} commands.
 \end{enumerate}
 
 \section{Demonstration}
@@ -73,13 +75,26 @@ Proofs are great! Therefore, we have our result.
 \noindent We can also use the moveproofs package to prove statements that aren't theorems.
 Note the reference to the corollary when this proof is moved to the appendix (thanks to the \texttt{cleveref} package).
 
-% Corollary two.
+% Corollary two. Demonstrates the use of \makeproof*
 \begin{corollary}\label{corollary_two}
 For any $\delta \in (0, 1)$, with probability $1 - \delta$, corollaries are useful.
 \end{corollary}
 
-\makeproof{corollary_two}{
-Corollaries support proofs. Therefore, we have our result.
+\makeproof*{corollary_two}{
+Introduction before the actual proof. First, we prove the following lemma:
+\begin{lemma}\label{lemma_three}
+Corollaries apply theorems.
+\end{lemma}
+\begin{proof}
+Corollaries follow theorems, and make claims based on them.
+\end{proof}
+
+Now we are ready to prove our main result: Corollary~\ref{corollary_two}.
+
+\vspace{0.4cm}
+\begin{proof}
+By lemma~\ref{lemma_three}, Corollaries apply theorems, and demonstrate new knowledge. Therefore, we have our result.
+\end{proof}
 }
 
 % Appendix

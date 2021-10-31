@@ -7,6 +7,8 @@
     prependtoappendix=false,
     manual=false,
 ]{moveproofs}
+\renewcommand{\MPAppendixSectionName}{Proofs of the Theorems, Lemmas, and Propositions stated in the paper}
+\renewcommand*{\appendixprelim}{\clearpage\footnotesize}
 
 \usepackage{listings}
 
@@ -38,7 +40,7 @@ To use the package:
 \makeproof{my_theorem}{
     My worldview does not permit a round Earth.
     Therefore, the world is flat.
-}
+}{Proof title}
 \end{lstlisting}
     \item Include the \texttt{moveproofs} package (\texttt{\textbackslash usepackage\{moveproofs\}}) and alter its options to choose how proofs are displayed:
         \begin{itemize}
@@ -63,6 +65,9 @@ First, we use the \texttt{\textbackslash appendixproofnotice} command to notify 
 
 Now, let's prove some theorems! The \texttt{location} package option controls whether the proofs appear inline or in the appendix.
 
+Also, you can use the callback \texttt{\textbackslash appendixprelim} to call before the appendix will start.
+
+
 % Theorem one.
 \begin{theorem}\label{theorem_one}
 For any $\delta \in (0, 1)$, with probability $1 - \delta$, proofs are useful.
@@ -70,7 +75,7 @@ For any $\delta \in (0, 1)$, with probability $1 - \delta$, proofs are useful.
 
 \makeproof{theorem_one}{
 Proofs are great! Therefore, we have our result.
-}
+}{This is the proof of Theorem \ref{theorem_one}}
 
 \noindent We can also use the moveproofs package to prove statements that aren't theorems.
 Note the reference to the corollary when this proof is moved to the appendix (thanks to the \texttt{cleveref} package).
@@ -95,7 +100,7 @@ Now we are ready to prove our main result: Corollary~\ref{corollary_two}.
 \begin{proof}
 By lemma~\ref{lemma_three}, Corollaries apply theorems, and demonstrate new knowledge. Therefore, we have our result.
 \end{proof}
-}
+}{Proof of corollary}
 
 % Appendix
 \appendix
@@ -103,6 +108,5 @@ By lemma~\ref{lemma_three}, Corollaries apply theorems, and demonstrate new know
 The \texttt{moveproofs} package won't alter existing appendix material.
 Toggle the \texttt{prependtoappendix} option to choose whether proofs are placed before or after the existing appendix.
 Alternatively, set \texttt{manual = true} to turn off automatic proof insertion into the appendix and use the \texttt{\textbackslash appendixproofsection\{Section Name\}} and \texttt{\textbackslash appendixproof\{theorem\_label\}} commands to manually specify where the proofs should go.
-
 
 \end{document}

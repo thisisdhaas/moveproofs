@@ -137,6 +137,7 @@
 \newif\ifnoappendix % True if the user hasn't created an appendix
 \newif\ifproofsinserted % True if this package has auto-inserted proofs into the document.
 \noappendixtrue
+\newcommand{\appendixprelim}{\clearpage\onecolumn}
 \newcommand{\MPAppendixProofs}{
     \ifproofsinserted
     \else
@@ -145,6 +146,7 @@
             \ifnoappendix
                 \oldappendix
             \fi
+            \appendixprelim
             \appendixproofsection{\MPAppendixSectionName}
             \pgfkeys{moveproofs, proofs/list}
             \proofsinsertedtrue

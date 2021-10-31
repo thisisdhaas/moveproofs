@@ -11,7 +11,7 @@
 
 \RequirePackage{pgfkeys}
 \RequirePackage{pgfopts}
-\RequirePackage{cleveref}
+\RequirePackage{hyperef}
 \RequirePackage{xparse}
 
 % Namespace our key-value store.
@@ -112,7 +112,7 @@
 % Example usage: \appendixproof{theorem_one}
 \DeclareDocumentCommand{\appendixproof}{s m}{
 \ifmoveproofstoappendix
-    \subsection{Proof of \Cref{#2}}\label{#2_proof}
+    \subsection{Proof of \ref{#2}}\label{#2_proof}
     \IfBooleanTF{#1}{
         \MPGetProof{#2}
     }{

@@ -11,7 +11,6 @@
 
 \RequirePackage{pgfkeys}
 \RequirePackage{pgfopts}
-\RequirePackage{cleveref}
 \RequirePackage{xparse}
 
 % Namespace our key-value store.
@@ -64,7 +63,7 @@
 
 % Low-level commands for manipulating the kv-store.
 \newcommand{\MPProofToStore}{}
-\DeclareDocumentCommand{\MPStoreProof}{s m +m}{
+\DeclareDocumentCommand{\MPStoreProof}{s m +m m}{
     % Pass the * argument through to \appendixproof
     \IfBooleanTF{#1}{
         \renewcommand{\MPProofToStore}[1]{\appendixproof*{##1}}
@@ -73,10 +72,12 @@
     }
     \pgfkeys{moveproofs, 
             proofs/#2/content/.code={#3},
+            proofs/#2/title/.code={#4},
             proofs/list/.append={\MPProofToStore{#2}}
     }
 }
 \newcommand{\MPGetProof}[1]{\pgfkeys{moveproofs, proofs/#1/content}}
+\newcommand{\MPGetTitle}[1]{\pgfkeys{moveproofs, proofs/#1/title}}
 
 % The \makeproof command lets you define a proof in the document.
 % Arguments are a label for the proof, and the proof body itself.
@@ -84,22 +85,20 @@
 % the proof content will not be auto-wrapped in a proof environment, and you
 % must manually insert your own with \begin{proof} and \end{proof}.
 % Example usage: \makeproof{theorem_one}{$a = b$, so we're done.}.
-\DeclareDocumentCommand{\makeproof}{s m +m}{
+\DeclareDocumentCommand{\makeproof}{s m +m m}{
     \IfBooleanTF{#1}{
-        \MPStoreProof*{#2}{#3}
+        \MPStoreProof*{#2}{#3}{#4}%
     }{
-        \MPStoreProof{#2}{#3}
+        \MPStoreProof{#2}{#3}{#4}%
     }
 
     % Insert the proof directly into the document inline if required by package options.
     \ifmoveproofstoappendix
     \else
         \IfBooleanTF{#1}{
-            \MPGetProof{#2}
+            \MPGetProof{#2}%
         }{
-            \begin{proof}
-            \MPGetProof{#2}
-            \end{proof}
+            \MPGetProof{#2}%
         }
     \fi
 }
@@ -112,13 +111,11 @@
 % Example usage: \appendixproof{theorem_one}
 \DeclareDocumentCommand{\appendixproof}{s m}{
 \ifmoveproofstoappendix
-    \subsection{Proof of \Cref{#2}}\label{#2_proof}
+    \subsection{\protect\MPGetTitle{#2}}\label{#2_proof}
     \IfBooleanTF{#1}{
-        \MPGetProof{#2}
+        \MPGetProof{#2}%
     }{
-        \begin{proof}
-        \MPGetProof{#2}
-        \end{proof}
+        \MPGetProof{#2}%
     }
 \else
 \fi
@@ -137,6 +134,7 @@
 \newif\ifnoappendix % True if the user hasn't created an appendix
 \newif\ifproofsinserted % True if this package has auto-inserted proofs into the document.
 \noappendixtrue
+\newcommand{\appendixprelim}{\clearpage\onecolumn}
 \newcommand{\MPAppendixProofs}{
     \ifproofsinserted
     \else
@@ -145,6 +143,7 @@
             \ifnoappendix
                 \oldappendix
             \fi
+            \appendixprelim
             \appendixproofsection{\MPAppendixSectionName}
             \pgfkeys{moveproofs, proofs/list}
             \proofsinsertedtrue
